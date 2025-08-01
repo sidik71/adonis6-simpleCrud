@@ -1,0 +1,1 @@
+# adonis6-simpleCrud
