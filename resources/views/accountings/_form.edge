@@ -1,0 +1,137 @@
+{{ csrfField() }}
+
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Name</label>
+    <input type="text" name="name" class="form-control" value="{{ accounting?.name || '' }}" required>
+  </div>
+  
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Type</label>
+    <select name="type" class="form-select" required>
+      <option value=""></option>
+      <option value="income" {{ accounting?.type === 'income' ? 'selected' : '' }}>Income</option>
+      <option value="expense" {{ accounting?.type === 'expense' ? 'selected' : '' }}>Expense</option>
+    </select>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Amount</label>
+    <div class="input-group">
+      <span class="input-group-text">Rp</span>
+      <input type="text" inputmode="decimal" id="amountDisplay" class="form-control" value="{{ accounting?.amount ? accounting.amount.toLocaleString() : '' }}" required>
+      <input type="hidden" id="amountValue" name="amount" value="{{ accounting?.amount || '' }}">
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Category</label>
+    <input type="text" name="category" class="form-control" value="{{ accounting?.category || '' }}" required>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Date</label>
+    <input type="date" name="date" class="form-control" value="{{ accounting?.date.toFormat('yyyy-LL-dd') || '' }}" required>
+  </div>
+  
+  <div class="col-md-6 mb-3">
+    <label class="form-label fw-medium">Payment Method</label>
+    <input type="text" name="payment_method" class="form-control" value="{{ accounting?.payment_method || '' }}" required>
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label fw-medium">Reference Number</label>
+  <input type="text" name="reference_number" class="form-control" value="{{ accounting?.reference_number || '' }}">
+  <div class="form-text text-muted">Opsional</div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label fw-medium">Description</label>
+  <textarea name="description" class="form-control" rows="3">{{ accounting?.description || '' }}</textarea>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const amountDisplay = document.getElementById('amountDisplay');
+    const amountValue = document.getElementById('amountValue');
+    
+    function addCommas(number) {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    if (amountDisplay.value) {
+      const numericValue = parseFloat(amountDisplay.value.replace(/,/g, ''));
+      if (!isNaN(numericValue)) {
+        amountDisplay.value = addCommas(numericValue);
+      }
+    }
+    
+    amountDisplay.addEventListener('input', function(e) {
+      let value = this.value.replace(/[^\d.]/g, '');
+      
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+      }
+      
+      amountValue.value = value;
+      
+      if (value) {
+        const decimalParts = value.split('.');
+        const integerPart = decimalParts[0];
+        const decimalPart = decimalParts.length > 1 ? decimalParts[1] : '';
+        
+        const formattedInteger = addCommas(integerPart);
+        
+        this.value = formattedInteger + (decimalPart ? '.' + decimalPart : '');
+      }
+    });
+    
+    amountDisplay.addEventListener('keypress', function(e) {
+      const charCode = (e.which) ? e.which : e.keyCode;
+      if (charCode === 46) { 
+        if (this.value.indexOf('.') !== -1) {
+          e.preventDefault();
+          return false;
+        }
+        return true;
+      } else if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        e.preventDefault();
+        return false;
+      }
+      return true;
+    });
+    
+    amountDisplay.form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      try {
+        if (amountValue.value) {
+          const numValue = parseFloat(amountValue.value.replace(/[^\d.]/g, ''));
+          
+          if (!isNaN(numValue) && numValue <= 999999999.99) {
+            amountValue.value = numValue.toString();
+            this.submit();
+          } else {
+            alert('Error: Please enter a valid amount.');
+          }
+        } else {
+          if (amountDisplay.hasAttribute('required')) {
+            alert('Error: Amount is required.');
+          } else {
+            this.submit();
+          }
+        }
+      } catch (err) {
+        console.error('Error processing form:', err);
+        alert('Error processing the form. Please check the values and try again.');
+      }
+    });
+  });
+</script>

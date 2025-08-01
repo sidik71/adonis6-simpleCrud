@@ -1,0 +1,34 @@
+@layouts.master()
+
+@slot('content')
+  <div class="row mb-4">
+    <div class="col-lg-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/accountings" class="text-decoration-none">Accounting</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Edit Data</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  
+  <div class="card shadow-sm">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">Edit Transaction</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/accountings/{{ accounting.id }}">
+        @include('accountings/_form')
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Update
+          </button>
+          <button type="reset" class="btn btn-secondary">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+@endslot
+@end
